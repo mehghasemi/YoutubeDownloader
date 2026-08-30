@@ -56,7 +56,12 @@ class DownloadApp(tk.Tk):
 
         ttk.Label(form, text="لینک ویدئو:").grid(row=0, column=0, sticky="e", padx=(0, 8), pady=6)
         url_entry = ttk.Entry(form, textvariable=self.url_var, justify="left")
-        url_entry.grid(row=0, column=1, columnspan=2, sticky="ew", pady=6)
+        url_entry.grid(row=0, column=1, sticky="ew", pady=6)
+        ttk.Button(form, text="Paste", command=self._paste_url).grid(
+            row=0, column=2, padx=(8, 0), pady=6
+        )
+        url_entry.bind("<Control-v>", self._paste_event)
+        url_entry.bind("<Control-V>", self._paste_event)
 
         ttk.Label(form, text="کیفیت:").grid(row=1, column=0, sticky="e", padx=(0, 8), pady=6)
         ttk.Combobox(
@@ -101,6 +106,18 @@ class DownloadApp(tk.Tk):
         folder = filedialog.askdirectory(initialdir=self.output_var.get())
         if folder:
             self.output_var.set(folder)
+
+    def _paste_event(self, _event: tk.Event) -> str:
+        self._paste_url()
+        return "break"
+
+    def _paste_url(self) -> None:
+        try:
+            clipboard_text = self.clipboard_get().strip()
+        except tk.TclError:
+            messagebox.showwarning("کلیپ‌بورد خالی است", "لینکی در کلیپ‌بورد پیدا نشد.")
+            return
+        self.url_var.set(clipboard_text)
 
     def _start_download(self) -> None:
         if self.downloading:
