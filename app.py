@@ -14,11 +14,17 @@ import threading
 import tkinter as tk
 from pathlib import Path
 from tkinter import filedialog, messagebox, ttk
+from tkinter import font as tkfont
 
 import yt_dlp
 
 
 DOWNLOAD_DIR = Path.home() / "Downloads" / "YoutubeDownloader"
+APP_VERSION = "1.1.0"
+CHANGELOG = (
+    ("1.1.0", "2026-08-30 13:52", ("رابط کاربری کاملاً راست‌چین و فارسی شد.", "افزودن پشتیبانی از فونت IRANSans با جایگزین خودکار.", "افزودن شماره نگارش و فهرست تغییرات.")),
+    ("1.0.0", "2026-08-30 13:22", ("نسخه‌ی اولیه‌ی دانلودر یوتیوب.", "دانلود ویدئو با کیفیت‌های 480p، 720p و 1080p.", "خروجی MP4 و MP3 و نمایش پیشرفت دانلود.")),
+)
 YOUTUBE_RE = re.compile(
     r"^https?://(?:(?:www|m)\.)?(?:youtube\.com|youtu\.be)/.+", re.IGNORECASE
 )
@@ -40,13 +46,31 @@ class DownloadApp(tk.Tk):
         self.type_var = tk.StringVar(value="ویدئو (MP4)")
         self.status_var = tk.StringVar(value="لینک یوتیوب را وارد کنید.")
         self.progress_var = tk.DoubleVar(value=0)
+        self.ui_font = self._find_font()
+        self.bold_font = (self.ui_font, 18, "bold")
+        self._configure_styles()
 
         self._build_ui()
         self.after(100, self._process_events)
 
+    def _find_font(self) -> str:
+        available = set(tkfont.families(self))
+        for name in ("IRANSans", "IRAN Sans", "IRANSansWeb", "Tahoma", "Segoe UI"):
+            if name in available:
+                return name
+        return "TkDefaultFont"
+
+    def _configure_styles(self) -> None:
+        style = ttk.Style(self)
+        style.configure(".", font=(self.ui_font, 10))
+        style.configure("TButton", font=(self.ui_font, 10))
+        style.configure("TLabel", font=(self.ui_font, 10))
+        style.configure("TEntry", font=(self.ui_font, 10))
+        style.configure("TCombobox", font=(self.ui_font, 10))
+
     def _build_ui(self) -> None:
         self.columnconfigure(0, weight=1)
-        ttk.Label(self, text="دانلودر ویدئوی یوتیوب", font=("Segoe UI", 18, "bold")).grid(
+        ttk.Label(self, text="دانلودر ویدئوی یوتیوب", font=self.bold_font).grid(
             row=0, column=0, sticky="e", pady=(0, 18)
         )
 
@@ -100,7 +124,64 @@ class DownloadApp(tk.Tk):
             text="برای ادغام صدا و تصویر یا تبدیل MP3، نصب بودن FFmpeg لازم است.",
             foreground="#666666",
         ).grid(row=5, column=0, sticky="e", pady=(18, 0))
+        version_label = tk.Label(
+            self,
+            text=f"نگارش {APP_VERSION}",
+            font=(self.ui_font, 9, "underline"),
+            fg="#1769aa",
+            cursor="hand2",
+            anchor="e",
+        )
+        version_label.grid(row=6, column=0, sticky="e", pady=(16, 0))
+        version_label.bind("<Button-1>", lambda _event: self._show_changelog())
         url_entry.focus_set()
+
+    def _show_changelog(self) -> None:
+        window = tk.Toplevel(self)
+        window.title("فهرست تغییرات")
+        window.geometry("610x430")
+        window.minsize(520, 330)
+        window.transient(self)
+        window.grab_set()
+        window.configure(padx=18, pady=18)
+
+        tk.Label(
+            window,
+            text="فهرست تغییرات",
+            font=(self.ui_font, 15, "bold"),
+            anchor="e",
+        ).pack(fill="x", pady=(0, 14))
+
+        container = ttk.Frame(window)
+        container.pack(fill="both", expand=True)
+        scrollbar = ttk.Scrollbar(container)
+        scrollbar.pack(side="left", fill="y")
+        changes = tk.Text(
+            container,
+            wrap="word",
+            height=15,
+            font=(self.ui_font, 10),
+            padx=12,
+            pady=10,
+            relief="solid",
+            borderwidth=1,
+            yscrollcommand=scrollbar.set,
+        )
+        changes.pack(side="right", fill="both", expand=True)
+        scrollbar.configure(command=changes.yview)
+
+        for index, (version, timestamp, items) in enumerate(CHANGELOG):
+            changes.insert("end", f"نگارش {version}\n", "version")
+            changes.insert("end", f"تاریخ و ساعت: {timestamp}\n", "timestamp")
+            for item in items:
+                changes.insert("end", f"• {item}\n")
+            if index < len(CHANGELOG) - 1:
+                changes.insert("end", "\n")
+        changes.tag_configure("version", font=(self.ui_font, 11, "bold"), justify="right")
+        changes.tag_configure("timestamp", foreground="#666666", justify="right")
+        changes.configure(state="disabled")
+
+        ttk.Button(window, text="بستن", command=window.destroy).pack(pady=(14, 0), anchor="e")
 
     def _choose_folder(self) -> None:
         folder = filedialog.askdirectory(initialdir=self.output_var.get())
