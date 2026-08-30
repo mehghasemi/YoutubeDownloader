@@ -8,6 +8,7 @@
 - [معماری و قرارداد کد](docs/ARCHITECTURE.md)
 - [توسعه، تست و دیباگ](docs/DEVELOPMENT.md)
 - [تاریخچه‌ی نگارش‌ها](CHANGELOG.md)
+- [نسخه‌ی وب محلی](docs/WEB.md)
 
 ## وضعیت فعلی
 
@@ -37,6 +38,18 @@ python -m PyInstaller --noconfirm --onefile --windowed --name YoutubeDownloader 
 ```
 
 خروجی در `dist\YoutubeDownloader.exe` ساخته می‌شود. پوشه‌های build و dist و فایل‌های spec خروجی تولیدی‌اند و طبق `.gitignore` commit نمی‌شوند.
+
+## اجرای نسخه‌ی وب محلی
+
+نسخه‌ی وب روی همین رایانه اجرا می‌شود و در مرورگر باز می‌گردد:
+
+```powershell
+python -m pip install -r requirements-web.txt
+python web_app.py
+```
+
+سپس به `http://127.0.0.1:5000` بروید. یا روی `Run-WebDownloader.bat` دوبار کلیک کنید.
+راهنمای کامل نسخه‌ی وب در [docs/WEB.md](docs/WEB.md) است.
 
 ## FFmpeg
 

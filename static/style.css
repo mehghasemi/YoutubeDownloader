@@ -1,0 +1,43 @@
+@font-face {
+  font-family: IRANSansLocal;
+  src: local("IRANSans"), local("IRAN Sans"), local("IRANSansWeb");
+}
+
+:root {
+  font-family: IRANSansLocal, Tahoma, "Segoe UI", sans-serif;
+  color: #172033;
+  background: #eef3f8;
+}
+
+* { box-sizing: border-box; }
+body { margin: 0; min-height: 100vh; }
+.page { width: min(760px, 100%); margin: 0 auto; padding: 40px 18px; }
+.card { background: #fff; border: 1px solid #dce5ef; border-radius: 20px; box-shadow: 0 18px 45px #28415d18; padding: 34px; }
+.eyebrow { color: #3478b8; font-size: .88rem; margin: 0 0 8px; }
+h1 { margin: 0; font-size: 1.8rem; }
+.subtitle { color: #64748b; margin: 8px 0 28px; }
+label { display: block; font-weight: 700; margin: 16px 0 7px; }
+input, select, button { width: 100%; min-height: 44px; border-radius: 10px; font: inherit; }
+input, select { border: 1px solid #cbd5e1; background: #fff; padding: 8px 12px; }
+input:focus, select:focus { border-color: #3478b8; outline: 3px solid #3478b822; }
+button { border: 0; cursor: pointer; font-weight: 700; padding: 8px 14px; }
+button:disabled { cursor: wait; opacity: .65; }
+.primary { background: #1769aa; color: #fff; margin-top: 24px; }
+.secondary { width: 96px; background: #e7f0f8; color: #1769aa; }
+.url-row { display: flex; direction: ltr; gap: 8px; }
+.url-row input { flex: 1; }
+.grid.two { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+.hint { color: #64748b; font-size: .83rem; margin: 6px 0; line-height: 1.7; }
+.progress-panel { border-top: 1px solid #e2e8f0; margin-top: 28px; padding-top: 22px; }
+.status-line { display: flex; justify-content: space-between; gap: 12px; }
+.progress-track { height: 12px; background: #e8eef5; border-radius: 99px; margin: 12px 0; overflow: hidden; }
+.progress-bar { background: linear-gradient(90deg, #1769aa, #45a3d8); height: 100%; width: 0; transition: width .3s; }
+.error { white-space: pre-wrap; color: #b42318; line-height: 1.7; }
+.file-link { display: block; color: #1769aa; font-weight: 700; margin-top: 12px; }
+.hidden { display: none; }
+footer { display: flex; justify-content: space-between; gap: 16px; color: #7b8794; font-size: .78rem; margin-top: 26px; }
+@media (max-width: 560px) {
+  .card { padding: 24px 18px; }
+  .grid.two { grid-template-columns: 1fr; gap: 0; }
+  footer { flex-direction: column; }
+}

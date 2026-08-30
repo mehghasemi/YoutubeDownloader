@@ -1,0 +1,76 @@
+<!doctype html>
+<html lang="fa" dir="rtl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>دانلودر یوتیوب</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+  <main class="page">
+    <section class="card">
+      <header>
+        <p class="eyebrow">نسخه‌ی وب محلی</p>
+        <h1>دانلودر ویدئوی یوتیوب</h1>
+        <p class="subtitle">دانلود روی همین کامپیوتر انجام می‌شود.</p>
+      </header>
+
+      <form id="download-form">
+        <label for="url">لینک ویدئو</label>
+        <div class="url-row">
+          <input id="url" name="url" type="url" dir="ltr"
+                 placeholder="https://www.youtube.com/watch?v=..." required>
+          <button class="secondary" id="paste" type="button">Paste</button>
+        </div>
+
+        <div class="grid two">
+          <div>
+            <label for="quality">کیفیت</label>
+            <select id="quality" name="quality">
+              <option value="1080">بهترین کیفیت تا 1080p</option>
+              <option value="720">بهترین کیفیت تا 720p</option>
+              <option value="480">بهترین کیفیت تا 480p</option>
+            </select>
+          </div>
+          <div>
+            <label for="output_type">نوع خروجی</label>
+            <select id="output_type" name="output_type">
+              <option value="video">ویدئو (MP4)</option>
+              <option value="audio">صدا (MP3)</option>
+            </select>
+          </div>
+        </div>
+
+        <label for="browser">کوکی مرورگر برای خطای ضدربات</label>
+        <select id="browser" name="browser">
+          <option value="">بدون کوکی</option>
+          <option value="chrome">Chrome</option>
+          <option value="edge">Edge</option>
+          <option value="firefox">Firefox</option>
+        </select>
+        <p class="hint">اگر YouTube درخواست ورود کرد، مرورگر دارای حساب را انتخاب کنید و قبل از دانلود ببندید.</p>
+
+        <label for="proxy">Proxy اختیاری</label>
+        <input id="proxy" name="proxy" dir="ltr" placeholder="مثلاً socks5://127.0.0.1:1080">
+        <p class="hint">اگر VPN برای برنامه‌ها کار نمی‌کند، Proxy محلی VPN را وارد کنید.</p>
+
+        <button class="primary" id="download" type="submit">شروع دانلود</button>
+      </form>
+
+      <section id="progress-panel" class="progress-panel hidden" aria-live="polite">
+        <div class="status-line"><span id="status">در حال آماده‌سازی...</span><span id="percent">0٪</span></div>
+        <div class="progress-track"><div id="progress" class="progress-bar"></div></div>
+        <p id="speed" class="hint"></p>
+        <p id="error" class="error"></p>
+        <a id="file-link" class="file-link hidden" download>دریافت فایل دانلودشده</a>
+      </section>
+
+      <footer>
+        <span>فایل‌ها در Downloads\YoutubeDownloader ذخیره می‌شوند.</span>
+        <span>نگارش {{ version }}</span>
+      </footer>
+    </section>
+  </main>
+  <script src="{{ url_for('static', filename='app.js') }}"></script>
+</body>
+</html>
