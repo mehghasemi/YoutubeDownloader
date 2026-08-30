@@ -1,8 +1,13 @@
-"""Simple YouTube downloader GUI.
+"""رابط گرافیکی دانلود ویدئو از YouTube.
 
-Requires:
+نقطه‌ی ورود برنامه همین فایل است. برای معماری، قرارداد eventها، وابستگی‌ها،
+ساخت EXE و روش دیباگ به ``docs/ARCHITECTURE.md`` و ``docs/DEVELOPMENT.md``
+مراجعه کنید.
+
+وابستگی runtime:
     python -m pip install -r requirements.txt
-    ffmpeg available on PATH for video/audio merging.
+
+FFmpeg باید برای merge ویدئو/صدا و تبدیل MP3 در PATH سیستم باشد.
 """
 
 from __future__ import annotations
@@ -31,6 +36,13 @@ YOUTUBE_RE = re.compile(
 
 
 class DownloadApp(tk.Tk):
+    """پنجره‌ی اصلی برنامه و هماهنگ‌کننده‌ی UI و thread دانلود.
+
+    تمام تغییرات widgetهای Tkinter در thread اصلی انجام می‌شوند. عملیات شبکه
+    داخل ``_download`` اجرا شده و نتیجه از طریق ``self.events`` به
+    ``_process_events`` منتقل می‌شود.
+    """
+
     def __init__(self) -> None:
         super().__init__()
         self.title("دانلودر یوتیوب")
@@ -54,6 +66,7 @@ class DownloadApp(tk.Tk):
         self.after(100, self._process_events)
 
     def _find_font(self) -> str:
+        """اولین فونت موجود از زنجیره‌ی IRANSans تا fallback را برمی‌گرداند."""
         available = set(tkfont.families(self))
         for name in ("IRANSans", "IRAN Sans", "IRANSansWeb", "Tahoma", "Segoe UI"):
             if name in available:
@@ -61,6 +74,7 @@ class DownloadApp(tk.Tk):
         return "TkDefaultFont"
 
     def _configure_styles(self) -> None:
+        """فونت پایه‌ی widgetهای ttk را تنظیم می‌کند."""
         style = ttk.Style(self)
         style.configure(".", font=(self.ui_font, 10))
         style.configure("TButton", font=(self.ui_font, 10))
@@ -69,6 +83,7 @@ class DownloadApp(tk.Tk):
         style.configure("TCombobox", font=(self.ui_font, 10))
 
     def _build_ui(self) -> None:
+        """تمام widgetهای پنجره‌ی اصلی، فرم دانلود و footer نگارش را می‌سازد."""
         self.columnconfigure(0, weight=1)
         ttk.Label(self, text="دانلودر ویدئوی یوتیوب", font=self.bold_font).grid(
             row=0, column=0, sticky="e", pady=(0, 18)
@@ -137,6 +152,7 @@ class DownloadApp(tk.Tk):
         url_entry.focus_set()
 
     def _show_changelog(self) -> None:
+        """فهرست CHANGELOG را از جدیدترین نگارش به قدیمی‌ترین نمایش می‌دهد."""
         window = tk.Toplevel(self)
         window.title("فهرست تغییرات")
         window.geometry("610x430")
@@ -184,6 +200,7 @@ class DownloadApp(tk.Tk):
         ttk.Button(window, text="بستن", command=window.destroy).pack(pady=(14, 0), anchor="e")
 
     def _choose_folder(self) -> None:
+        """پوشه‌ی خروجی را با دیالوگ انتخاب پوشه تغییر می‌دهد."""
         folder = filedialog.askdirectory(initialdir=self.output_var.get())
         if folder:
             self.output_var.set(folder)
@@ -193,6 +210,7 @@ class DownloadApp(tk.Tk):
         return "break"
 
     def _paste_url(self) -> None:
+        """متن clipboard را در کادر URL قرار می‌دهد."""
         try:
             clipboard_text = self.clipboard_get().strip()
         except tk.TclError:
@@ -201,6 +219,7 @@ class DownloadApp(tk.Tk):
         self.url_var.set(clipboard_text)
 
     def _start_download(self) -> None:
+        """ورودی را اعتبارسنجی و thread دانلود را راه‌اندازی می‌کند."""
         if self.downloading:
             return
         url = self.url_var.get().strip()
@@ -217,6 +236,7 @@ class DownloadApp(tk.Tk):
         threading.Thread(target=self._download, args=(url, output), daemon=True).start()
 
     def _download(self, url: str, output: Path) -> None:
+        """دانلود را با format و postprocessor مناسب انتخاب کاربر انجام می‌دهد."""
         is_audio = self.type_var.get() == "صدا (MP3)"
         quality = {
             "بهترین کیفیت تا 1080p": 1080,
@@ -255,6 +275,7 @@ class DownloadApp(tk.Tk):
             self.events.put(("error", str(exc)))
 
     def _progress_hook(self, data: dict) -> None:
+        """وضعیت yt-dlp را به event قابل مصرف برای UI تبدیل می‌کند."""
         if data.get("status") == "downloading":
             raw = data.get("_percent_str", "0%").replace("%", "").strip()
             try:
@@ -266,6 +287,7 @@ class DownloadApp(tk.Tk):
             self.events.put(("progress", (100, "دانلود فایل تمام شد؛ در حال پردازش...")))
 
     def _process_events(self) -> None:
+        """صف eventها را در thread اصلی تخلیه و UI را به‌روزرسانی می‌کند."""
         try:
             while True:
                 event, payload = self.events.get_nowait()
